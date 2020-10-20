@@ -1,0 +1,2 @@
+# IndexAdapterPrototype
+Just a test

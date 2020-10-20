@@ -1,0 +1,48 @@
+name: convert xml
+
+# Run this workflow every time a new commit pushed to your repository
+on: [ push, pull_request ]
+
+jobs:
+  rstcheck:
+    name: josm_check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install Python dependencies
+        run: python -m pip install shapely==1.7.1 lxml==4.6.0
+
+      - name: Checkout ELI
+        run: git clone --depth 1 --single-branch --branch check_geometry_validity https://github.com/rbuffat/editor-layer-index.git
+
+      - name: Convert to XML
+        run: python scripts/convert_xml.py editor-layer-index/sources
+
+      - name: Download maps.xsd
+        run: wget https://raw.githubusercontent.com/openstreetmap/josm/master/resources/data/maps.xsd
+
+      - name: Validate XML
+        run: xmllint --schema maps.xsd imagery.xml --noout
+
+      - name: Export
+        run: |
+          mkdir output
+          mv imagery.xml output
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.6.2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: output # The folder the action should deploy.
