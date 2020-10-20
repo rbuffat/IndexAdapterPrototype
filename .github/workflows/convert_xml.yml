@@ -5,7 +5,7 @@ on: [ push, pull_request ]
 
 jobs:
   rstcheck:
-    name: josm_check
+    name: convert_xml
     runs-on: ubuntu-latest
 
     steps:
@@ -29,11 +29,10 @@ jobs:
       - name: Convert to XML
         run: python scripts/convert_xml.py editor-layer-index/sources
 
-      - name: Download maps.xsd
-        run: wget https://raw.githubusercontent.com/openstreetmap/josm/master/resources/data/maps.xsd
-
       - name: Validate XML
-        run: xmllint --schema maps.xsd imagery.xml --noout
+        run: |
+          wget https://raw.githubusercontent.com/openstreetmap/josm/master/resources/data/maps.xsd
+          xmllint --schema maps.xsd imagery.xml --noout
 
       - name: Export
         run: |
